@@ -5,8 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AR Online Demo</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        a-scene { width: 100vw; height: 100vh; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            height: 100%;
+            background-color: #f0f0f0; /* Optional: background color */
+        }
+        a-scene {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Optional: Styles for responsiveness on mobile */
+        @media (max-width: 768px) {
+            a-entity {
+                scale: 0.15 0.15 0.15; /* Adjust scale for mobile devices */
+            }
+        }
     </style>
 </head>
 <body>
@@ -19,7 +34,7 @@
         <!-- GLB model with user-interactive rotation -->
         <a-entity 
             id="movable-model"
-            gltf-model="url(./test3.glb)"  <!-- Ensure the correct path to your GLB file -->
+            gltf-model="url(./test3.glb)"  
             scale="0.2 0.2 0.2" 
             position="0 0 -5" 
             rotation="0 0 0"
