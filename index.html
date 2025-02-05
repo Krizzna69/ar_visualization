@@ -9,17 +9,16 @@
             margin: 0;
             overflow: hidden;
             height: 100%;
-            background-color: #f0f0f0; /* Optional: background color */
         }
         a-scene {
             width: 100vw;
             height: 100vh;
         }
 
-        /* Optional: Styles for responsiveness on mobile */
+        /* Adjust the scale of the model based on viewport size */
         @media (max-width: 768px) {
-            a-entity {
-                scale: 0.15 0.15 0.15; /* Adjust scale for mobile devices */
+            #movable-model {
+                scale: 0.15 0.15 0.15; /* Smaller scale for mobile */
             }
         }
     </style>
@@ -38,7 +37,7 @@
             scale="0.2 0.2 0.2" 
             position="0 0 -5" 
             rotation="0 0 0"
-            gesture-handler>  <!-- Attach the gesture-handler component -->
+            gesture-handler>
         </a-entity>
 
         <!-- Lighting for better visibility -->
@@ -51,10 +50,10 @@
     </a-scene>
 
     <script>
-        // Register the gesture-handler component
+        // Register the gesture-handler component for rotating the model
         AFRAME.registerComponent('gesture-handler', {
             init: function () {
-                const model = this.el; // The car model entity
+                const model = this.el; // The model entity
                 let isDragging = false;
                 let previousX = 0;
 
@@ -68,7 +67,7 @@
                     if (isDragging) {
                         const deltaX = event.clientX - previousX;
                         const rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5; // Adjust rotation speed here
+                        rotation.y += deltaX * 0.5; // Rotation speed
                         model.setAttribute('rotation', rotation);
                         previousX = event.clientX;
                     }
@@ -88,7 +87,7 @@
                     if (isDragging) {
                         const deltaX = event.touches[0].clientX - previousX;
                         const rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5; // Adjust rotation speed here
+                        rotation.y += deltaX * 0.5; // Rotation speed
                         model.setAttribute('rotation', rotation);
                         previousX = event.touches[0].clientX;
                     }
