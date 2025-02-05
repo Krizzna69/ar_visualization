@@ -19,11 +19,11 @@
         <!-- GLB model with user-interactive rotation -->
         <a-entity 
             id="movable-model"
-            gltf-model="url(test3.glb)" 
+            gltf-model="url(./test3.glb)"  <!-- Ensure the correct path to your GLB file -->
             scale="0.2 0.2 0.2" 
             position="0 0 -5" 
             rotation="0 0 0"
-            gesture-handler>
+            gesture-handler>  <!-- Attach the gesture-handler component -->
         </a-entity>
 
         <!-- Lighting for better visibility -->
@@ -36,33 +36,50 @@
     </a-scene>
 
     <script>
+        // Register the gesture-handler component
         AFRAME.registerComponent('gesture-handler', {
             init: function () {
-                let model = this.el;
+                const model = this.el; // The car model entity
                 let isDragging = false;
                 let previousX = 0;
-                let previousRotationY = 0;
 
-                // Start dragging
+                // Mouse events for desktop
                 window.addEventListener('mousedown', (event) => {
                     isDragging = true;
                     previousX = event.clientX;
-                    // Store the initial rotation on the Y-axis
-                    previousRotationY = model.getAttribute('rotation').y;
                 });
 
-                // Update rotation while dragging
                 window.addEventListener('mousemove', (event) => {
                     if (isDragging) {
-                        let deltaX = event.clientX - previousX;
-                        let rotation = model.getAttribute('rotation');
-                        rotation.y = previousRotationY + deltaX * 0.2;  // Adjust sensitivity here
+                        const deltaX = event.clientX - previousX;
+                        const rotation = model.getAttribute('rotation');
+                        rotation.y += deltaX * 0.5; // Adjust rotation speed here
                         model.setAttribute('rotation', rotation);
+                        previousX = event.clientX;
                     }
                 });
 
-                // Stop dragging
                 window.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+
+                // Touch events for mobile
+                window.addEventListener('touchstart', (event) => {
+                    isDragging = true;
+                    previousX = event.touches[0].clientX;
+                });
+
+                window.addEventListener('touchmove', (event) => {
+                    if (isDragging) {
+                        const deltaX = event.touches[0].clientX - previousX;
+                        const rotation = model.getAttribute('rotation');
+                        rotation.y += deltaX * 0.5; // Adjust rotation speed here
+                        model.setAttribute('rotation', rotation);
+                        previousX = event.touches[0].clientX;
+                    }
+                });
+
+                window.addEventListener('touchend', () => {
                     isDragging = false;
                 });
             }
