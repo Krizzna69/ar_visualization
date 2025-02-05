@@ -41,27 +41,32 @@
                 let model = this.el;
                 let isDragging = false;
                 let previousX = 0;
-                
+                let rotation = { x: 0, y: 0, z: 0 };
+    
+                // Start dragging
                 window.addEventListener('mousedown', (event) => {
                     isDragging = true;
                     previousX = event.clientX;
+                    rotation = model.getAttribute('rotation');
                 });
-                
+    
+                // Update rotation while dragging
                 window.addEventListener('mousemove', (event) => {
                     if (isDragging) {
                         let deltaX = event.clientX - previousX;
-                        let rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5;
+                        rotation.y += deltaX * 0.2; // Adjust sensitivity here
                         model.setAttribute('rotation', rotation);
                         previousX = event.clientX;
                     }
                 });
-                
+    
+                // Stop dragging
                 window.addEventListener('mouseup', () => {
                     isDragging = false;
                 });
             }
         });
     </script>
+    
 </body>
 </html>
