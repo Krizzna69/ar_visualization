@@ -15,13 +15,19 @@
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
     
     <a-scene embedded arjs renderer="antialias: true; highQuality: true;">
-
+        <a-entity 
+            id="rotating-platform"
+            geometry="primitive: cylinder; radius: 1.5; height: 0.1" 
+            material="color: gray; metalness: 0.8; roughness: 0.3"
+            position="0 0 -5"
+            animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+        </a-entity>
         <!-- GLB model with continuous rotation on the X-axis -->
         <a-entity 
             id="movable-model"
             gltf-model="url(test3.glb)" 
             scale="0.5 0.5 0.5" 
-            position="0 0 -5" 
+            position="0 0.5 -5" 
             rotation="0 0 0"
             animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
         </a-entity>
