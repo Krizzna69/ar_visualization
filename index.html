@@ -6,7 +6,29 @@
     <title>AR Online Demo</title>
     <style>
         body { margin: 0; overflow: hidden; }
-        a-scene { width: 100vw; height: 100vh; }
+        a-scene { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
+
+        /* Arrow buttons for movement */
+        .arrow-button {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Positioning buttons */
+        #up { top: 20px; left: 50%; transform: translateX(-50%); }
+        #down { bottom: 20px; left: 50%; transform: translateX(-50%); }
+        #left { bottom: 20px; left: 20px; }
+        #right { bottom: 20px; right: 20px; }
     </style>
 </head>
 <body>
@@ -34,6 +56,12 @@
         <a-entity camera look-controls wasd-controls>
         </a-entity>
     </a-scene>
+
+    <!-- Arrow Buttons for movement -->
+    <div id="up" class="arrow-button">↑</div>
+    <div id="down" class="arrow-button">↓</div>
+    <div id="left" class="arrow-button">←</div>
+    <div id="right" class="arrow-button">→</div>
 
     <script>
         // Register the gesture-handler component for rotating the model
@@ -96,24 +124,28 @@
                 const model = this.el;
                 const movementSpeed = 0.1; // Speed of movement
 
-                window.addEventListener('keydown', (event) => {
+                // Arrow button events for movement
+                document.getElementById('up').addEventListener('click', () => {
                     const position = model.getAttribute('position');
-                    switch (event.key) {
-                        case 'ArrowUp':
-                            position.z -= movementSpeed; // Move forward along the Z-axis
-                            break;
-                        case 'ArrowDown':
-                            position.z += movementSpeed; // Move backward along the Z-axis
-                            break;
-                        case 'ArrowLeft':
-                            position.x -= movementSpeed; // Move left along the X-axis
-                            break;
-                        case 'ArrowRight':
-                            position.x += movementSpeed; // Move right along the X-axis
-                            break;
-                        default:
-                            break;
-                    }
+                    position.z -= movementSpeed; // Move forward along the Z-axis
+                    model.setAttribute('position', position);
+                });
+
+                document.getElementById('down').addEventListener('click', () => {
+                    const position = model.getAttribute('position');
+                    position.z += movementSpeed; // Move backward along the Z-axis
+                    model.setAttribute('position', position);
+                });
+
+                document.getElementById('left').addEventListener('click', () => {
+                    const position = model.getAttribute('position');
+                    position.x -= movementSpeed; // Move left along the X-axis
+                    model.setAttribute('position', position);
+                });
+
+                document.getElementById('right').addEventListener('click', () => {
+                    const position = model.getAttribute('position');
+                    position.x += movementSpeed; // Move right along the X-axis
                     model.setAttribute('position', position);
                 });
             }
