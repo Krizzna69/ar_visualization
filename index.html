@@ -124,13 +124,13 @@
                 const movementSpeed = 0.7; // Speed of movement
 
                 // Arrow button events for movement
-                document.getElementById('up').addEventListener('click', () => {
+                document.getElementById('down').addEventListener('click', () => {
                     const position = model.getAttribute('position');
                     position.z -= movementSpeed; // Move forward along the Z-axis
                     model.setAttribute('position', position);
                 });
 
-                document.getElementById('down').addEventListener('click', () => {
+                document.getElementById('up').addEventListener('click', () => {
                     const position = model.getAttribute('position');
                     position.z += movementSpeed; // Move backward along the Z-axis
                     model.setAttribute('position', position);
