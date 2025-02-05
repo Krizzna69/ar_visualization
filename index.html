@@ -3,20 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLB Model in AR.js</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <title>AR Online Demo</title>
+    <style>
+        body { margin: 0; }
+        a-scene { width: 100%; height: 100vh; }
+    </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
+<body>
+    <!-- A-Frame and AR.js Setup -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    
     <a-scene embedded arjs>
-        
-            <a-entity id="glb-model" gltf="url(test1.glb)" position="0 0 0" scale="0.5 0.5 0.5"></a-entity>
-        
+        <!-- GLB model with continuous rotation on the X-axis -->
+        <a-entity 
+            id="movable-model"
+            gltf-model="url(test1.glb)" 
+            scale="1 1 1" 
+            position="0 0 -5" 
+            rotation="-90 0 0"
+            draggable="true">
+        </a-entity>
+
+        <!-- Camera Entity for AR -->
+        <a-entity camera>
+            <!-- Cursor for user interaction -->
             
-        <a-entity camera></a-entity>
+        </a-entity>
     </a-scene>
 
+    <!-- Instructions for the user -->
 </body>
 </html>
