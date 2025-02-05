@@ -5,22 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AR Online Demo</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            height: 100%;
-        }
-        a-scene {
-            width: 100vw;
-            height: 100vh;
-        }
-
-        /* Adjust the scale of the model based on viewport size */
-        @media (max-width: 768px) {
-            #movable-model {
-                scale: 0.15 0.15 0.15; /* Smaller scale for mobile */
-            }
-        }
+        body { margin: 0; overflow: hidden; }
+        a-scene { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
@@ -33,11 +19,11 @@
         <!-- GLB model with user-interactive rotation -->
         <a-entity 
             id="movable-model"
-            gltf-model="url(./test3.glb)"  
+            gltf-model="url(./test3.glb)"  <!-- Ensure the correct path to your GLB file -->
             scale="0.2 0.2 0.2" 
             position="0 0 -5" 
             rotation="0 0 0"
-            gesture-handler>
+            gesture-handler>  <!-- Attach the gesture-handler component -->
         </a-entity>
 
         <!-- Lighting for better visibility -->
@@ -50,10 +36,10 @@
     </a-scene>
 
     <script>
-        // Register the gesture-handler component for rotating the model
+        // Register the gesture-handler component
         AFRAME.registerComponent('gesture-handler', {
             init: function () {
-                const model = this.el; // The model entity
+                const model = this.el; // The car model entity
                 let isDragging = false;
                 let previousX = 0;
 
@@ -67,7 +53,7 @@
                     if (isDragging) {
                         const deltaX = event.clientX - previousX;
                         const rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5; // Rotation speed
+                        rotation.y += deltaX * 0.5; // Adjust rotation speed here
                         model.setAttribute('rotation', rotation);
                         previousX = event.clientX;
                     }
@@ -87,7 +73,7 @@
                     if (isDragging) {
                         const deltaX = event.touches[0].clientX - previousX;
                         const rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5; // Rotation speed
+                        rotation.y += deltaX * 0.5; // Adjust rotation speed here
                         model.setAttribute('rotation', rotation);
                         previousX = event.touches[0].clientX;
                     }
