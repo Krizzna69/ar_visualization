@@ -6,7 +6,7 @@
     <title>AR Online Demo</title>
     <style>
         body { margin: 0; overflow: hidden; }
-        a-scene { width: 100%; height: 100%; }
+        a-scene { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
@@ -21,8 +21,9 @@
             id="movable-model"
             gltf-model="url(./test3.glb)"  
             scale="0.2 0.2 0.2" 
-            position="0 0 -5" 
-            gesture-handler>
+            position="0 0 -5"
+            gesture-handler
+            movement-handler>
         </a-entity>
 
         <!-- Lighting for better visibility -->
@@ -35,16 +36,17 @@
     </a-scene>
 
     <script>
-        // Register the gesture-handler component to handle rotations
+        // Register the gesture-handler component for rotating the model
         AFRAME.registerComponent('gesture-handler', {
             schema: {
                 speed: {type: 'number', default: 0.5} // Speed of rotation
             },
 
             init: function () {
-                const model = this.el; // The model entity
+                const model = this.el;
                 let isDragging = false;
                 let previousX = 0;
+                let initialTouchX = 0;
 
                 // Mouse events for desktop
                 window.addEventListener('mousedown', (event) => {
@@ -69,21 +71,50 @@
                 // Touch events for mobile
                 window.addEventListener('touchstart', (event) => {
                     isDragging = true;
-                    previousX = event.touches[0].clientX;
+                    initialTouchX = event.touches[0].clientX;
                 });
 
                 window.addEventListener('touchmove', (event) => {
                     if (isDragging) {
-                        const deltaX = event.touches[0].clientX - previousX;
+                        const deltaX = event.touches[0].clientX - initialTouchX;
                         const rotation = model.getAttribute('rotation');
                         rotation.y += deltaX * this.data.speed; // Adjust rotation speed
                         model.setAttribute('rotation', rotation);
-                        previousX = event.touches[0].clientX;
+                        initialTouchX = event.touches[0].clientX;
                     }
                 });
 
                 window.addEventListener('touchend', () => {
                     isDragging = false;
+                });
+            }
+        });
+
+        // Register the movement-handler component for arrow key movement
+        AFRAME.registerComponent('movement-handler', {
+            init: function () {
+                const model = this.el;
+                const movementSpeed = 0.1; // Speed of movement
+
+                window.addEventListener('keydown', (event) => {
+                    const position = model.getAttribute('position');
+                    switch (event.key) {
+                        case 'ArrowUp':
+                            position.z -= movementSpeed; // Move forward along the Z-axis
+                            break;
+                        case 'ArrowDown':
+                            position.z += movementSpeed; // Move backward along the Z-axis
+                            break;
+                        case 'ArrowLeft':
+                            position.x -= movementSpeed; // Move left along the X-axis
+                            break;
+                        case 'ArrowRight':
+                            position.x += movementSpeed; // Move right along the X-axis
+                            break;
+                        default:
+                            break;
+                    }
+                    model.setAttribute('position', position);
                 });
             }
         });
