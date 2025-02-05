@@ -41,47 +41,31 @@
                 let model = this.el;
                 let isDragging = false;
                 let previousX = 0;
-                
+                let currentRotation = model.getAttribute('rotation'); // Store the initial rotation state
+    
+                // Start dragging
                 window.addEventListener('mousedown', (event) => {
                     isDragging = true;
                     previousX = event.clientX;
                 });
-                
+    
+                // Update rotation while dragging
                 window.addEventListener('mousemove', (event) => {
                     if (isDragging) {
                         let deltaX = event.clientX - previousX;
-                        let rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5;
-                        model.setAttribute('rotation', rotation);
+                        currentRotation.y += deltaX * 0.2; // Adjust sensitivity here
+                        model.setAttribute('rotation', currentRotation);
                         previousX = event.clientX;
                     }
                 });
-                
+    
+                // Stop dragging
                 window.addEventListener('mouseup', () => {
-                    isDragging = false;
-                });
-
-                // Touch events for mobile devices
-                window.addEventListener('touchstart', (event) => {
-                    isDragging = true;
-                    previousX = event.touches[0].clientX;
-                });
-
-                window.addEventListener('touchmove', (event) => {
-                    if (isDragging) {
-                        let deltaX = event.touches[0].clientX - previousX;
-                        let rotation = model.getAttribute('rotation');
-                        rotation.y += deltaX * 0.5;
-                        model.setAttribute('rotation', rotation);
-                        previousX = event.touches[0].clientX;
-                    }
-                });
-
-                window.addEventListener('touchend', () => {
                     isDragging = false;
                 });
             }
         });
     </script>
+    
 </body>
 </html>
