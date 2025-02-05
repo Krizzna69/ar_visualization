@@ -14,7 +14,8 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
     
-    <a-scene embedded arjs>
+    <a-scene embedded arjs renderer="antialias: true; highQuality: true;">
+
         <!-- GLB model with continuous rotation on the X-axis -->
         <a-entity 
             id="movable-model"
