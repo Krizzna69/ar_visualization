@@ -16,14 +16,14 @@
     
     <a-scene embedded arjs renderer="antialias: true; highQuality: true;" vr-mode-ui="enabled: false">
         
-        <!-- GLB model with continuous rotation on the X-axis -->
+        <!-- GLB model with user-interactive rotation -->
         <a-entity 
             id="movable-model"
             gltf-model="url(test3.glb)" 
             scale="0.2 0.2 0.2" 
             position="0 0 -5" 
             rotation="0 0 0"
-            animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+            gesture-handler>
         </a-entity>
 
         <!-- Lighting for better visibility -->
@@ -34,5 +34,34 @@
         <a-entity camera look-controls wasd-controls>
         </a-entity>
     </a-scene>
+
+    <script>
+        AFRAME.registerComponent('gesture-handler', {
+            init: function () {
+                let model = this.el;
+                let isDragging = false;
+                let previousX = 0;
+                
+                window.addEventListener('mousedown', (event) => {
+                    isDragging = true;
+                    previousX = event.clientX;
+                });
+                
+                window.addEventListener('mousemove', (event) => {
+                    if (isDragging) {
+                        let deltaX = event.clientX - previousX;
+                        let rotation = model.getAttribute('rotation');
+                        rotation.y += deltaX * 0.5;
+                        model.setAttribute('rotation', rotation);
+                        previousX = event.clientX;
+                    }
+                });
+                
+                window.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+            }
+        });
+    </script>
 </body>
 </html>
