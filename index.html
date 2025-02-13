@@ -3,100 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Online Demo</title>
+    <title>Professional 3D Model Viewer</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; }
-        a-scene { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
-
-        /* Arrow buttons for camera movement */
-        .arrow-button {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-size: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 10;
+        body { 
+            margin: 0; 
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            background-color: #2e2e2e;
         }
 
-        /* Positioning buttons */
-        #up { top: 20px; left: 50%; transform: translateX(-50%); }
-        #down { bottom: 20px; left: 50%; transform: translateX(-50%); }
-        #left { bottom: 20px; left: 20px; }
-        #right { bottom: 20px; right: 20px; }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0));
+            padding: 20px 0;
+            color: white;
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .file-input-container {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 1000;
+            display: inline-block;
+        }
+
+        .file-input-container:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateX(-50%) scale(1.02);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .file-input-container span {
+            color: #2196F3;
+            font-weight: 500;
+        }
+
+        #loading-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            display: none;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
     </style>
 </head>
 <body>
-    <!-- A-Frame and AR.js Setup -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <div class="header">
+        <h1>3D MODEL SHOWCASE</h1>
+        <p>Experience Your Design in Premium Quality</p>
+    </div>
+
+    <!-- Custom file upload button -->
+    <label for="file-input" class="file-input-container">
+        <span>Choose GLB File to Display</span>
+    </label>
+    <input type="file" id="file-input" accept=".glb">
     
-    <a-scene embedded arjs renderer="antialias: true; highQuality: true;" vr-mode-ui="enabled: false">
+    <div class="controls-hint">
+        WASD: Move | Mouse: Look | Scroll: Zoom
+    </div>
+
+    <div id="loading-message">Loading your model...</div>
+
+    <!-- A-Frame Scene -->
+    <a-scene environment="preset: forest; groundColor: #445; groundColor2: #667; ground: flat"
+             renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
+             loading-screen="dotsColor: #2196F3; backgroundColor: #000">
         
-        <!-- GLB model in the scene -->
+        <!-- Model container -->
         <a-entity 
-            id="movable-model"
-            gltf-model="url(./test3.glb)"  
-            scale="0.2 0.2 0.2" 
-            position="0 0 -5">
+            id="model-container"
+            position="0 2.5 -3"
+            animation="property: rotation; to: 0 360 0; dur: 15000; easing: linear; loop: true">
         </a-entity>
 
-        <!-- Lighting for better visibility -->
-        <a-light type="directional" position="1 1 1" intensity="1"></a-light>
-        <a-light type="ambient" intensity="0.5"></a-light>
+        <!-- Improved lighting setup -->
+        <a-light type="directional" position="1 1 1" intensity="0.8"></a-light>
+        <a-light type="directional" position="-1 1 1" intensity="0.5"></a-light>
+        <a-light type="ambient" color="#FFF" intensity="0.5"></a-light>
 
-        <!-- Camera Entity for AR -->
-        <a-entity id="camera" camera look-controls wasd-controls>
+        <!-- Camera setup -->
+        <a-entity position="0 1.6 0">
+            <a-camera wasd-controls="enabled: true" look-controls="enabled: true"></a-camera>
         </a-entity>
+
+        <!-- Environment -->
+        <a-sky color="#ECECEC"></a-sky>
+        <a-grid material="color: #ccc" rotation="-90 0 0"></a-grid>
     </a-scene>
 
-    <!-- Arrow Buttons for movement -->
-    <div id="up" class="arrow-button">↑</div>
-    <div id="down" class="arrow-button">↓</div>
-    <div id="left" class="arrow-button">←</div>
-    <div id="right" class="arrow-button">→</div>
-
     <script>
-        // Register the camera-movement component for moving the camera around the model
-        AFRAME.registerComponent('camera-movement', {
-            init: function () {
-                const cameraEntity = document.querySelector('#camera');
-                const movementSpeed = 0.1; // Speed of camera movement
+        document.querySelector('a-scene').addEventListener('loaded', function () {
+            console.log('A-Frame scene has loaded');
+        });
 
-                // Arrow button events for camera movement
-                document.getElementById('up').addEventListener('click', () => {
-                    const position = cameraEntity.getAttribute('position');
-                    position.z -= movementSpeed; // Move camera forward along the Z-axis
-                    cameraEntity.setAttribute('position', position);
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const loadingMessage = document.getElementById('loading-message');
+                loadingMessage.style.display = 'block';
+                
+                const objectURL = URL.createObjectURL(file);
+                const modelContainer = document.getElementById('model-container');
+                
+                // Remove existing model if any
+                while (modelContainer.firstChild) {
+                    modelContainer.removeChild(modelContainer.firstChild);
+                }
+
+                // Create new model entity
+                const modelEntity = document.createElement('a-entity');
+                modelEntity.setAttribute('gltf-model', objectURL);
+                modelEntity.setAttribute('scale', '1 1 1'); // Starting with neutral scale
+
+                // Add model to container
+                modelContainer.appendChild(modelEntity);
+
+                // Handle model loading events
+                modelEntity.addEventListener('model-loaded', () => {
+                    console.log('Model loaded successfully');
+                    loadingMessage.style.display = 'none';
+                    
+                    // Auto-scale model to reasonable size
+                    setTimeout(() => {
+                        const bbox = new THREE.Box3().setFromObject(modelEntity.object3D);
+                        const size = bbox.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 2 / maxDim;
+                        modelEntity.setAttribute('scale', `${scale} ${scale} ${scale}`);
+                    }, 100);
                 });
 
-                document.getElementById('down').addEventListener('click', () => {
-                    const position = cameraEntity.getAttribute('position');
-                    position.z += movementSpeed; // Move camera backward along the Z-axis
-                    cameraEntity.setAttribute('position', position);
-                });
-
-                document.getElementById('left').addEventListener('click', () => {
-                    const position = cameraEntity.getAttribute('position');
-                    position.x -= movementSpeed; // Move camera left along the X-axis
-                    cameraEntity.setAttribute('position', position);
-                });
-
-                document.getElementById('right').addEventListener('click', () => {
-                    const position = cameraEntity.getAttribute('position');
-                    position.x += movementSpeed; // Move camera right along the X-axis
-                    cameraEntity.setAttribute('position', position);
+                modelEntity.addEventListener('model-error', (error) => {
+                    console.error('Error loading model:', error);
+                    loadingMessage.textContent = 'Error loading model';
+                    loadingMessage.style.display = 'block';
+                    setTimeout(() => {
+                        loadingMessage.style.display = 'none';
+                    }, 3000);
                 });
             }
         });
 
-        // Attach the camera-movement handler to the camera entity
-        document.querySelector('#camera').setAttribute('camera-movement', '');
+        // Cleanup function
+        window.addEventListener('unload', () => {
+            const modelContainer = document.getElementById('model-container');
+            const model = modelContainer.querySelector('[gltf-model]');
+            if (model) {
+                URL.revokeObjectURL(model.getAttribute('gltf-model'));
+            }
+        });
     </script>
 </body>
 </html>
