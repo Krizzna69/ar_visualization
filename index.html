@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Professional 3D Model Viewer</title>
+    <title>AR 3D Model Viewer</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { 
-            margin: 0; 
+        body {
+            margin: 0;
             overflow: hidden;
             font-family: 'Poppins', sans-serif;
-            background-color: #2e2e2e;
+            background-color: #000;
+            color: white;
         }
 
         .header {
@@ -20,23 +22,24 @@
             left: 0;
             right: 0;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0));
-            padding: 20px 0;
+            padding: 20px;
             color: white;
-            text-align: center;
             z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .header h1 {
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 600;
-            letter-spacing: 2px;
-        }
-
-        .header p {
-            margin: 5px 0 0;
+        .datetime-display {
+            font-size: 14px;
             font-weight: 300;
-            letter-spacing: 1px;
+            text-align: left;
+        }
+
+        .user-info {
+            font-size: 14px;
+            font-weight: 500;
+            text-align: right;
         }
 
         .file-input-container {
@@ -83,18 +86,6 @@
             animation: pulse 2s infinite;
         }
 
-        .controls-hint {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 1000;
-        }
-
         @keyframes pulse {
             0% { opacity: 0.6; }
             50% { opacity: 1; }
@@ -103,10 +94,7 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>3D MODEL SHOWCASE</h1>
-        <p>Experience Your Design in Premium Quality</p>
-    </div>
+    
 
     <!-- Custom file upload button -->
     <label for="file-input" class="file-input-container">
@@ -114,40 +102,39 @@
     </label>
     <input type="file" id="file-input" accept=".glb">
     
-    <div class="controls-hint">
-        WASD: Move | Mouse: Look | Scroll: Zoom
-    </div>
-
-    <div id="loading-message">Loading your model...</div>
+    <div id="loading-message">Loading model...</div>
 
     <!-- A-Frame Scene -->
-    <a-scene environment="preset: forest; groundColor: #445; groundColor2: #667; ground: flat"
-             renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
-             loading-screen="dotsColor: #2196F3; backgroundColor: #000">
-        
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         <!-- Model container -->
         <a-entity 
             id="model-container"
-            position="0 2.5 -3"
+            position="0 0 -5"
+            scale="1 1 1"
+            rotation="0 0 0"
             animation="property: rotation; to: 0 360 0; dur: 15000; easing: linear; loop: true">
         </a-entity>
 
-        <!-- Improved lighting setup -->
+        <!-- Lighting setup -->
         <a-light type="directional" position="1 1 1" intensity="0.8"></a-light>
         <a-light type="directional" position="-1 1 1" intensity="0.5"></a-light>
         <a-light type="ambient" color="#FFF" intensity="0.5"></a-light>
 
-        <!-- Camera setup -->
-        <a-entity position="0 1.6 0">
-            <a-camera wasd-controls="enabled: true" look-controls="enabled: true"></a-camera>
-        </a-entity>
-
-        <!-- Environment -->
-        <a-sky color="#ECECEC"></a-sky>
-        <a-grid material="color: #ccc" rotation="-90 0 0"></a-grid>
+        <!-- Camera -->
+        <a-entity camera></a-entity>
     </a-scene>
 
     <script>
+        // Update time function
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // Update time every second
+        setInterval(updateTime, 1000);
+
         document.querySelector('a-scene').addEventListener('loaded', function () {
             console.log('A-Frame scene has loaded');
         });
@@ -161,25 +148,20 @@
                 const objectURL = URL.createObjectURL(file);
                 const modelContainer = document.getElementById('model-container');
                 
-                // Remove existing model if any
                 while (modelContainer.firstChild) {
                     modelContainer.removeChild(modelContainer.firstChild);
                 }
 
-                // Create new model entity
                 const modelEntity = document.createElement('a-entity');
                 modelEntity.setAttribute('gltf-model', objectURL);
-                modelEntity.setAttribute('scale', '1 1 1'); // Starting with neutral scale
-
-                // Add model to container
+                modelEntity.setAttribute('scale', '1 1 1');
+                
                 modelContainer.appendChild(modelEntity);
 
-                // Handle model loading events
                 modelEntity.addEventListener('model-loaded', () => {
                     console.log('Model loaded successfully');
                     loadingMessage.style.display = 'none';
                     
-                    // Auto-scale model to reasonable size
                     setTimeout(() => {
                         const bbox = new THREE.Box3().setFromObject(modelEntity.object3D);
                         const size = bbox.getSize(new THREE.Vector3());
@@ -200,7 +182,6 @@
             }
         });
 
-        // Cleanup function
         window.addEventListener('unload', () => {
             const modelContainer = document.getElementById('model-container');
             const model = modelContainer.querySelector('[gltf-model]');
