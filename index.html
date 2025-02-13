@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR 3D Model Viewer</title>
+    <title>AR Model & Image Viewer</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -12,8 +12,6 @@
             margin: 0;
             overflow: hidden;
             font-family: 'Poppins', sans-serif;
-            background-color: #000;
-            color: white;
         }
 
         .header {
@@ -54,7 +52,6 @@
             transition: all 0.3s ease;
             cursor: pointer;
             z-index: 1000;
-            display: inline-block;
         }
 
         .file-input-container:hover {
@@ -83,111 +80,158 @@
             font-size: 16px;
             display: none;
             z-index: 1000;
-            animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        .arjs-loader {
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .arjs-loader div {
+            text-align: center;
+            font-size: 1.25em;
+            color: white;
         }
     </style>
 </head>
 <body>
+    <div class="arjs-loader">
+        <div>Loading, please wait...</div>
+    </div>
+
     
 
-    <!-- Custom file upload button -->
     <label for="file-input" class="file-input-container">
-        <span>Choose GLB File to Display</span>
+        <span>Choose GLB or Image File</span>
     </label>
-    <input type="file" id="file-input" accept=".glb">
+    <input type="file" id="file-input" accept=".glb,.jpg,.jpeg,.png">
     
-    <div id="loading-message">Loading model...</div>
+    <div id="loading-message">Loading file...</div>
 
-    <!-- A-Frame Scene -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        <!-- Model container -->
-        <a-entity 
-            id="model-container"
-            position="0 0 -5"
-            scale="1 1 1"
-            rotation="0 0 0"
-            animation="property: rotation; to: 0 360 0; dur: 15000; easing: linear; loop: true">
+    <a-scene
+        vr-mode-ui="enabled: false"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+
+        <a-entity id="model-container" position="0 0 -2">
         </a-entity>
 
-        <!-- Lighting setup -->
-        <a-light type="directional" position="1 1 1" intensity="0.8"></a-light>
-        <a-light type="directional" position="-1 1 1" intensity="0.5"></a-light>
-        <a-light type="ambient" color="#FFF" intensity="0.5"></a-light>
-
-        <!-- Camera -->
-        <a-entity camera></a-entity>
+        <a-camera position="0 0 0"></a-camera>
     </a-scene>
 
     <script>
-        // Update time function
+        // Remove loader when scene is ready
+        document.querySelector('a-scene').addEventListener('loaded', function () {
+            document.querySelector('.arjs-loader').style.display = 'none';
+        });
+
+        // Update time
         function updateTime() {
             const now = new Date();
-            const timeString = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-            document.getElementById('current-time').textContent = timeString;
+            document.getElementById('current-time').textContent = 
+                now.toISOString().replace('T', ' ').substr(0, 19) + ' UTC';
         }
-
-        // Update time every second
         setInterval(updateTime, 1000);
 
-        document.querySelector('a-scene').addEventListener('loaded', function () {
-            console.log('A-Frame scene has loaded');
+        // Register custom component for image handling
+        AFRAME.registerComponent('set-image', {
+            schema: {
+                url: {type: 'string'}
+            },
+            init: function() {
+                this.el.addEventListener('loaded', () => {
+                    document.getElementById('loading-message').style.display = 'none';
+                });
+            }
         });
 
         document.getElementById('file-input').addEventListener('change', function(event) {
             const file = event.target.files[0];
-            if (file) {
-                const loadingMessage = document.getElementById('loading-message');
-                loadingMessage.style.display = 'block';
-                
-                const objectURL = URL.createObjectURL(file);
-                const modelContainer = document.getElementById('model-container');
-                
-                while (modelContainer.firstChild) {
-                    modelContainer.removeChild(modelContainer.firstChild);
+            if (!file) return;
+
+            const loadingMessage = document.getElementById('loading-message');
+            loadingMessage.style.display = 'block';
+            
+            const objectURL = URL.createObjectURL(file);
+            const modelContainer = document.getElementById('model-container');
+            
+            // Clear existing content
+            while (modelContainer.firstChild) {
+                modelContainer.removeChild(modelContainer.firstChild);
+            }
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            if (['jpg', 'jpeg', 'png'].includes(fileExtension)) {
+                // Create assets
+                let assets = document.querySelector('a-assets');
+                if (!assets) {
+                    assets = document.createElement('a-assets');
+                    document.querySelector('a-scene').appendChild(assets);
                 }
 
-                const modelEntity = document.createElement('a-entity');
-                modelEntity.setAttribute('gltf-model', objectURL);
-                modelEntity.setAttribute('scale', '1 1 1');
-                
-                modelContainer.appendChild(modelEntity);
+                const img = document.createElement('img');
+                img.setAttribute('id', 'uploaded-image');
+                img.setAttribute('src', objectURL);
+                assets.appendChild(img);
 
-                modelEntity.addEventListener('model-loaded', () => {
-                    console.log('Model loaded successfully');
+                img.onload = () => {
+                    const aspectRatio = img.width / img.height;
+                    let width = 1;
+                    let height = width / aspectRatio;
+
+                    const imageEntity = document.createElement('a-image');
+                    imageEntity.setAttribute('src', '#uploaded-image');
+                    imageEntity.setAttribute('position', '0 0 -5');
+                    imageEntity.setAttribute('width', width);
+                    imageEntity.setAttribute('height', height);
+                    imageEntity.setAttribute('look-at', '[camera]');
+                    imageEntity.setAttribute('set-image', '');
+
+                    modelContainer.appendChild(imageEntity);
                     loadingMessage.style.display = 'none';
-                    
-                    setTimeout(() => {
-                        const bbox = new THREE.Box3().setFromObject(modelEntity.object3D);
-                        const size = bbox.getSize(new THREE.Vector3());
-                        const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 2 / maxDim;
-                        modelEntity.setAttribute('scale', `${scale} ${scale} ${scale}`);
-                    }, 100);
+                };
+
+            } else if (fileExtension === 'glb') {
+                const entity = document.createElement('a-entity');
+                entity.setAttribute('gltf-model', objectURL);
+                entity.setAttribute('position', '0 0 0');
+                entity.setAttribute('rotation', '0 0 0');
+                entity.setAttribute('scale', '0.5 0.5 0.5');
+                entity.setAttribute('animation', {
+                    property: 'rotation',
+                    to: '0 360 0',
+                    dur: 15000,
+                    easing: 'linear',
+                    loop: true
                 });
 
-                modelEntity.addEventListener('model-error', (error) => {
-                    console.error('Error loading model:', error);
-                    loadingMessage.textContent = 'Error loading model';
-                    loadingMessage.style.display = 'block';
-                    setTimeout(() => {
-                        loadingMessage.style.display = 'none';
-                    }, 3000);
+                entity.addEventListener('model-loaded', () => {
+                    loadingMessage.style.display = 'none';
                 });
+
+                modelContainer.appendChild(entity);
             }
         });
 
+        // Cleanup
         window.addEventListener('unload', () => {
             const modelContainer = document.getElementById('model-container');
-            const model = modelContainer.querySelector('[gltf-model]');
-            if (model) {
-                URL.revokeObjectURL(model.getAttribute('gltf-model'));
-            }
+            const elements = modelContainer.querySelectorAll('[src], [gltf-model]');
+            elements.forEach(element => {
+                const url = element.getAttribute('src') || element.getAttribute('gltf-model');
+                if (url && url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                }
+            });
         });
     </script>
 </body>
